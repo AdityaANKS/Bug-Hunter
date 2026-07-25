@@ -1,0 +1,356 @@
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+from bughunter.agent.anti_loop import FAILED_ACCESS_PATTERNS
+
+
+class FailureCategory(str, Enum):
+    ENV_CONSTRAINT = "env_constraint"
+    PATH_ERROR = "path_error"
+    PARAM_ERROR = "param_error"
+    INFO_NEEDED = "info_needed"
+    UNKNOWN = "unknown"
+
+
+class Attempt(BaseModel):
+    path: str
+    success: bool
+    category: FailureCategory | None = None
+    details: str = ""
+    vuln_type: str = ""
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+
+class ReflexionState(BaseModel):
+    attempts: list[Attempt] = Field(default_factory=list)
+    constraints: list[str] = Field(default_factory=list)
+    failed_paths: list[str] = Field(default_factory=list)
+    reflections: list[dict[str, Any]] = Field(default_factory=list)
+    consecutive_failures: int = 0
+    last_vuln_type: str = ""
+    vuln_type_fail_count: int = 0
+
+
+class ReflexionEngine(BaseModel):
+    max_same_vuln_fails: int = 2
+    max_total_no_progress: int = 5
+    max_reflections_before_escalate: int = 3
+    escalation_max_level: int = 4
+    state: ReflexionState = Field(default_factory=ReflexionState)
+
+    def record_attempt(
+        self,
+        path: str,
+        success: bool,
+        category: FailureCategory | None = None,
+        details: str = "",
+        vuln_type: str = "",
+    ) -> None:
+        attempt = Attempt(
+            path=path,
+            success=success,
+            category=category,
+            details=details,
+            vuln_type=vuln_type,
+        )
+        self.state.attempts.append(attempt)
+
+        if success:
+            self.state.consecutive_failures = 0
+            self.state.vuln_type_fail_count = 0
+            if vuln_type:
+                self.state.last_vuln_type = vuln_type
+            return
+
+        self.state.consecutive_failures += 1
+        # don't put placeholder "unknown"/nullPathstuffedFailedPathList to avoid contaminationFailedHistory and Attribution
+        if path and path != "unknown":
+            self.state.failed_paths.append(path)
+
+        if vuln_type:
+            if vuln_type == self.state.last_vuln_type:
+                self.state.vuln_type_fail_count += 1
+            else:
+                self.state.last_vuln_type = vuln_type
+                self.state.vuln_type_fail_count = 1
+
+        if category and category != FailureCategory.UNKNOWN and details:
+            self.state.constraints.append(details)
+
+    def should_reflect(self) -> bool:
+        same_vuln_stale = self.state.vuln_type_fail_count >= self.max_same_vuln_fails
+        no_progress_stale = self.state.consecutive_failures >= self.max_total_no_progress
+        return same_vuln_stale or no_progress_stale
+
+    def should_escalate(self) -> bool:
+        return len(self.state.reflections) >= self.max_reflections_before_escalate
+
+    def get_escalation_level(self) -> int:
+        level = (self.state.consecutive_failures // 2) + len(self.state.reflections)
+        return min(self.escalation_max_level, max(0, level))
+
+    def get_escalation_hints(self) -> list[str]:
+        hints_by_level = {
+            0: ["try firstOriginal payload(NoEncoding)."],
+            1: [
+                "URL EncodingSpecial characters.",
+                "Switch keyword case (SeLeCt).",
+                "Try the whitespace variant (/**/、newline、Tab).",
+            ],
+            2: [
+                "try double URL Encoding.",
+                "Insert inline comments like /**/.",
+                "Browser-orientedInjection Pointuse HTML entityEncoding.",
+            ],
+            3: [
+                "try Unicode escape(\\u0027).",
+                "try hex Encoding(0x...).",
+                "Split keywords using string concatenation (con||cat).",
+                "Use an equivalent replacement function to bypass the blocked function.",
+            ],
+            4: [
+                "Combine multiple layersEncodingConfused.",
+                "Use an alternative syntax to achieve the same goal (e.g. HANDLER replace SELECT).",
+                "Use time blind or out-of-band instead (OOB)aisleConfirm.",
+                "Switch tocompletely differentVulnerabilityType/attack surface.",
+            ],
+        }
+        return hints_by_level[self.get_escalation_level()]
+
+    def record_reflection(self, old_path: str, new_path: str, reasoning: str) -> None:
+        self.state.reflections.append(
+            {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "old_path": old_path,
+                "new_path": new_path,
+                "reasoning": reasoning,
+            }
+        )
+        self.state.consecutive_failures = 0
+        self.state.vuln_type_fail_count = 0
+
+    def analyze_failure_patterns(self) -> list[dict[str, Any]]:
+        patterns: dict[str, dict[str, Any]] = {}
+        for attempt in self.state.attempts:
+            if attempt.success:
+                continue
+            category = attempt.category.value if attempt.category else FailureCategory.UNKNOWN.value
+            if category not in patterns:
+                patterns[category] = {"count": 0, "paths": set(), "examples": []}
+            patterns[category]["count"] += 1
+            patterns[category]["paths"].add(attempt.path)
+            if attempt.details and len(patterns[category]["examples"]) < 3:
+                patterns[category]["examples"].append(attempt.details[:200])
+
+        result = []
+        for category, info in sorted(patterns.items(), key=lambda item: item[1]["count"], reverse=True):
+            result.append(
+                {
+                    "category": category,
+                    "occurrences": info["count"],
+                    "affected_paths": sorted(info["paths"]),
+                    "example_details": info["examples"],
+                    "suggested_action": self._suggest_for_category(category),
+                }
+            )
+        return result
+
+    def get_failed_paths(self) -> list[str]:
+        return list(dict.fromkeys(self.state.failed_paths))
+
+    def to_prompt_block(self) -> str:
+        """lightweightStatusblock (perroundinjection). DetailedFailedmodel/upgradeHintonly in to_reflection_prompt
+        triggerReflectionhourOutput, to avoid repeated injection with this block、waste token."""
+        if not self.state.attempts and not self.state.reflections:
+            return ""
+
+        lines = [
+            "🔁 ReflectionStatus:",
+            f"- Continuous no progressroundnumber: {self.state.consecutive_failures}",
+            f"- similarVulnerabilityFailedfrequency: {self.state.vuln_type_fail_count}",
+            f"- Current upgrade level: L{self.get_escalation_level()}",
+        ]
+
+        failed_paths = self.get_failed_paths()
+        if failed_paths:
+            lines.append(f"- alreadyFailedPath(Do not repeat): {', '.join(failed_paths[:8])}")
+
+        return "\n".join(lines)
+
+    def to_reflection_prompt(self) -> str:
+        """ReflectionTakeover instructions, only in should_reflect() when triggeredOutput; Bearing detailsFailedattribution + upgradeHint."""
+        if not self.should_reflect():
+            return ""
+
+        lines = [
+            "🔴 ReflectionError 500 (Server Error)!!1500.That’s an error.There was an error. Please try again later.That’s all we know.Failed,Mustchange strategy):",
+            "- Stop the current attackPathReplace the previous payload.",
+            "- ReviewFailedRecord and clearly indicate which previous assumptions are likely to be wrong.",
+            "- Replacing the next one payload Before, choose a substantively different attackPath/VulnerabilityType.",
+            f"- Current upgrade level: L{self.get_escalation_level()}",
+        ]
+
+        if self.should_escalate():
+            lines.append("- ⚠️ Forced upgrade:Switch tocompletely differentVulnerabilityTypeor attack surface,Do notLove the current direction again.")
+
+        patterns = self.analyze_failure_patterns()
+        if patterns:
+            lines.append("- FailedmodelAnalysis:")
+            for pattern in patterns[:3]:
+                lines.append(
+                    f"  - {pattern['category']} ×{pattern['occurrences']}: "
+                    f"{pattern['suggested_action']}"
+                )
+
+        hints = self.get_escalation_hints()
+        if hints:
+            lines.append(f"- This level (L{self.get_escalation_level()}) bypassHints: ")
+            for hint in hints:
+                lines.append(f"  - {hint}")
+
+        return "\n".join(lines)
+
+    def extract_experience(self) -> dict[str, Any] | None:
+        if not self.state.attempts:
+            return None
+
+        successful_paths = [attempt.path for attempt in self.state.attempts if attempt.success]
+        return {
+            "total_attempts": len(self.state.attempts),
+            "successful_paths": successful_paths,
+            "failed_paths": self.get_failed_paths(),
+            "constraints": list(dict.fromkeys(self.state.constraints)),
+            "reflections": self.state.reflections,
+            "failure_patterns": self.analyze_failure_patterns(),
+            "last_vuln_type": self.state.last_vuln_type,
+            "escalation_level": self.get_escalation_level(),
+        }
+
+    @staticmethod
+    def _suggest_for_category(category: str) -> str:
+        suggestions = {
+            FailureCategory.ENV_CONSTRAINT.value: (
+                "useEncoding/obfuscation bypassFilter, switch protocols or endpoints, andConfirmAccess restrictions (WAF/Permissions/current limit)."
+            ),
+            FailureCategory.PATH_ERROR.value: (
+                "dropLowShouldPathpriority,Switch toDifferent attack surfaces/VulnerabilityType."
+            ),
+            FailureCategory.PARAM_ERROR.value: (
+                "Adjust parameter name、delimiter、payload Syntax or injection location."
+            ),
+            FailureCategory.INFO_NEEDED.value: (
+                "Supplementary reconnaissance firstInfoTry this againPath."
+            ),
+        }
+        return suggestions.get(category, "ReviewFailedRecord, change your thinking.")
+
+
+def classify_failure(response_text: str) -> FailureCategory | None:
+    text = response_text.lower()
+    if not text.strip():
+        return None
+
+    if any(pattern.lower() in text for pattern in FAILED_ACCESS_PATTERNS):
+        return FailureCategory.ENV_CONSTRAINT
+
+    category_patterns = {
+        FailureCategory.ENV_CONSTRAINT: [
+            # English
+            "waf",
+            "403",
+            "forbidden",
+            "blocked",
+            "filtered",
+            "permission denied",
+            "unauthorized",
+            "rate limit",
+            "timeout",
+            "connection refused",
+            "bad gateway",
+            "service unavailable",
+            # Mediumarts
+            "intercepted",
+            "quiltFilter",
+            "quiltwaf",
+            "intercept",
+            "FilterLose",
+            "escape",
+            "Blockaccess",
+            "No permission",
+            "Insufficient permissions",
+            "frequency limit",
+            "Current limiting",
+        ],
+        FailureCategory.PATH_ERROR: [
+            # English
+            "vulnerability does not exist",
+            "not vulnerable",
+            "no injection",
+            "not injectable",
+            "false positive",
+            "dead end",
+            "wrong attack surface",
+            # Mediumarts
+            "There is no suchVulnerability",
+            "NoVulnerability",
+            "noneVulnerability",
+            "noInjection Point",
+            "no injection",
+            "None here",
+            "False Positive",
+            "dead end",
+            "dead end",
+            "Switch attack surface",
+            "change direction",
+        ],
+        FailureCategory.PARAM_ERROR: [
+            # English
+            "invalid payload",
+            "syntax error",
+            "bad parameter",
+            "wrong parameter",
+            "encoding error",
+            "malformed",
+            "parse error",
+            "delimiter",
+            # Mediumarts
+            "Parameter error",
+            "Wrong parameters",
+            "payloadInvalid",
+            "payload Invalid",
+            "grammarError",
+            "EncodingError",
+            "FormatError",
+            "delimiter",
+        ],
+        FailureCategory.INFO_NEEDED: [
+            # English
+            "need more information",
+            "need more recon",
+            "unknown parameter",
+            "insufficient information",
+            "collect more",
+            "fingerprint first",
+            "enumerate first",
+            # Mediumarts
+            "need moreInfo",
+            "Insufficient information",
+            "unknown parameters",
+            "Collect first",
+            "Scout first",
+            "Enumerate first",
+            "FirstFingerprint",
+            "Collect again",
+        ],
+    }
+
+    for category, patterns in category_patterns.items():
+        if any(pattern in text for pattern in patterns):
+            return category
+
+    return FailureCategory.UNKNOWN

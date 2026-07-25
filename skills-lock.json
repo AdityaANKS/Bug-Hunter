@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "ethical-hacking-methodology": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ethical-hacking-methodology/SKILL.md",
+      "computedHash": "5b9f2835ea9f73c51b59e8279312873675c6458a486d9ba52dfb2c620a89d6d5"
+    }
+  }
+}
