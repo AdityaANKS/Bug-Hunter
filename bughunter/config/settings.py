@@ -23,13 +23,13 @@ from pydantic import ValidationError
 from .schema import (
     BUILTIN_MCP_SERVERS,
     PROVIDER_PRESETS,
+    BugHunterConfig,
     FallbackProviderConfig,
     LLMProvider,
     MCPServerConfig,
     MCPServersConfig,
     MCPTransportConfig,
     ModelPoolEntry,
-    BugHunterConfig,
 )
 
 # ── Paths ──────────────────────────────────────────────────────────

@@ -13,12 +13,10 @@ import asyncio
 import os
 import sys
 import time
-from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
 from bughunter.config.schema import BugHunterConfig, ModelPoolEntry
-
 
 # ── Data structures ─────────────────────────────────────────────────
 

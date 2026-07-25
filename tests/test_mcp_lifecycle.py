@@ -6,7 +6,7 @@ import asyncio
 
 import pytest
 
-from bughunter.config.schema import BUILTIN_MCP_SERVERS, MCPServerConfig, BugHunterConfig
+from bughunter.config.schema import BUILTIN_MCP_SERVERS, BugHunterConfig, MCPServerConfig
 from bughunter.mcp.lifecycle import MCPLifecycleManager
 from bughunter.mcp.registry import HealthStatus
 

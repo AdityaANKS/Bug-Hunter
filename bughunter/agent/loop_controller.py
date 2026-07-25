@@ -7,8 +7,6 @@ import re
 from collections import Counter
 from typing import Any, Callable, Optional
 
-from bughunter.agent.scan_budget import ScanBudget, ScanPhase
-
 from bughunter.agent.constraint_policy import validate_phase_transition
 from bughunter.agent.context import PentestPhase
 from bughunter.agent.ctf_mode import update_ctf_state
@@ -20,6 +18,7 @@ from bughunter.agent.reasoning_state import (
 )
 from bughunter.agent.reflexion import FailureCategory, classify_failure
 from bughunter.agent.runtime_state import AgentResult, PersistentCycleResult
+from bughunter.agent.scan_budget import ScanBudget
 
 RECON_MIN_ROUNDS = 8
 

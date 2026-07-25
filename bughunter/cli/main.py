@@ -312,7 +312,8 @@ def _run_repl() -> None:
     if getattr(config.safety, 'sandbox_auto_start', True):
         try:
             import threading
-            from bughunter.agent.builtin_tools import _get_sandbox_manager, _SANDBOX_SESSION_ID
+
+            from bughunter.agent.builtin_tools import _SANDBOX_SESSION_ID, _get_sandbox_manager
 
             sandbox_mgr = _get_sandbox_manager()
             console.print("[bold cyan][+] Kali Sandbox:[/] Starting in background...")
@@ -868,7 +869,7 @@ def _run_repl() -> None:
     # Cleanup sandbox
     if sandbox_started:
         try:
-            from bughunter.agent.builtin_tools import _get_sandbox_manager, _SANDBOX_SESSION_ID
+            from bughunter.agent.builtin_tools import _SANDBOX_SESSION_ID, _get_sandbox_manager
             _get_sandbox_manager().stop_sandbox(_SANDBOX_SESSION_ID)
             console.print("[dim]Kali sandbox stopped.[/]")
         except Exception:
@@ -963,9 +964,10 @@ def _print_status(agent, mcp_manager, target, phase, config) -> None:
 def _handle_sandbox_command(args: str, console) -> None:
     """Handle sandbox REPL commands (start/stop/exec/status)."""
     import asyncio
+
     from rich.table import Table
 
-    from bughunter.agent.builtin_tools import _get_sandbox_manager, _SANDBOX_SESSION_ID
+    from bughunter.agent.builtin_tools import _SANDBOX_SESSION_ID, _get_sandbox_manager
 
     manager = _get_sandbox_manager()
 
@@ -1266,7 +1268,7 @@ async def _run_cli_orchestrated_task(
     sandbox_active = False
     if getattr(config.safety, 'sandbox_auto_start', True):
         try:
-            from bughunter.agent.builtin_tools import _get_sandbox_manager, _SANDBOX_SESSION_ID
+            from bughunter.agent.builtin_tools import _SANDBOX_SESSION_ID, _get_sandbox_manager
             sandbox_mgr = _get_sandbox_manager()
             console.print("[bold cyan][+] Kali Sandbox:[/] Starting...")
             session = await sandbox_mgr.start_sandbox(_SANDBOX_SESSION_ID)
@@ -1305,7 +1307,7 @@ async def _run_cli_orchestrated_task(
         # Cleanup sandbox
         if sandbox_active:
             try:
-                from bughunter.agent.builtin_tools import _get_sandbox_manager, _SANDBOX_SESSION_ID
+                from bughunter.agent.builtin_tools import _SANDBOX_SESSION_ID, _get_sandbox_manager
                 _get_sandbox_manager().stop_sandbox(_SANDBOX_SESSION_ID)
             except Exception:
                 pass

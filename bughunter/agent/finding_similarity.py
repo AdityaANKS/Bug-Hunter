@@ -85,7 +85,6 @@ _VULN_TYPE_ALIASES: dict[str, str] = {
     "info disclosure": "info_disclosure",
     "data breach": "info_disclosure",
     "sensitiveInfoGive way": "info_disclosure",
-    "info disclosure": "info_disclosure",
 }
 
 

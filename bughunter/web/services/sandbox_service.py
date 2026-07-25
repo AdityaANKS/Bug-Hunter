@@ -7,10 +7,8 @@ start/stop/exec operations accessed through the Web UI API.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 from datetime import datetime, timezone
-from typing import Optional
 from uuid import uuid4
 
 from bughunter.web.services.sandbox_ssh import CommandResult, ssh_check_ready, ssh_exec

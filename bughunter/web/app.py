@@ -117,8 +117,8 @@ def create_app():
 
     @app.post("/api/models/pool")
     async def update_models_pool(request: ModelPoolUpdateRequest):
-        from bughunter.config.settings import load_config, save_config
         from bughunter.config.schema import ModelPoolEntry
+        from bughunter.config.settings import load_config, save_config
         config = load_config()
         config.llm.model_pool = [
             ModelPoolEntry(

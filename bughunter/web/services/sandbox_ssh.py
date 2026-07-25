@@ -7,7 +7,7 @@ using paramiko, isolated from the Docker lifecycle management.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass

@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -21,7 +20,6 @@ from bughunter.config.schema import (
     ModelPoolEntry,
     SessionConfig,
 )
-
 
 # ── Fixtures ─────────────────────────────────────────────────────────
 
@@ -472,7 +470,7 @@ class TestSubAgentSpawn:
             assert len(results) == 2
             # One should have an error
             errors = [r for r in results if r.error]
-            successes = [r for r in results if r.success]
+            [r for r in results if r.success]
             assert len(errors) >= 1
 
     @pytest.mark.asyncio

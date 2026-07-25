@@ -4,7 +4,7 @@ import json
 from types import SimpleNamespace
 
 from bughunter.agent import recon_tools
-from bughunter.config.schema import ReconConfig, BugHunterConfig
+from bughunter.config.schema import BugHunterConfig, ReconConfig
 
 
 def _agent(recon: ReconConfig | None = None):

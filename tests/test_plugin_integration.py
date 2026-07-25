@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from bughunter.config.schema import SessionConfig, BugHunterConfig
+from bughunter.config.schema import BugHunterConfig, SessionConfig
 from bughunter.plugins import (
     PluginContext,
     PluginResult,

@@ -999,7 +999,8 @@ def _apply_language_pt(session: dict[str, Any], lang: str) -> None:
 def _cmd_sandbox(session: dict[str, Any], args: str) -> None:
     """Handle /sandbox slash command."""
     import asyncio
-    from bughunter.agent.builtin_tools import _get_sandbox_manager, _SANDBOX_SESSION_ID
+
+    from bughunter.agent.builtin_tools import _SANDBOX_SESSION_ID, _get_sandbox_manager
 
     manager = _get_sandbox_manager()
 

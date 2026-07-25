@@ -711,7 +711,8 @@ def _h_language(session: dict[str, Any], args: str) -> str | None:
 def _h_sandbox(session: dict[str, Any], args: str) -> str | None:
     """Manage the Kali Linux sandbox from the TUI."""
     import asyncio
-    from bughunter.agent.builtin_tools import _get_sandbox_manager, _SANDBOX_SESSION_ID
+
+    from bughunter.agent.builtin_tools import _SANDBOX_SESSION_ID, _get_sandbox_manager
 
     manager = _get_sandbox_manager()
 

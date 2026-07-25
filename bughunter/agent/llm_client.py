@@ -6,6 +6,7 @@ import asyncio
 import inspect
 import json
 import os
+import re as _re
 import sys
 from typing import Any, Optional, Protocol, runtime_checkable
 
@@ -76,8 +77,6 @@ _MAX_MSG_CONTENT_CHARS = 8000
 _DEFAULT_CONTEXT_TOKENS = 60_000
 
 # Patterns that mark lines worth keeping during summarization
-import re as _re
-
 _IMPORTANT_LINE_PATTERNS = [
     _re.compile(r"(?:status|http)[:\s]*[1-5]\d{2}", _re.IGNORECASE),  # HTTP status codes
     _re.compile(r"\b(?:port|PORT)\s*\d+", _re.IGNORECASE),  # Port numbers
@@ -140,9 +139,9 @@ def _summarize_long_content(content: str) -> str:
     # 2. Extract ALL important lines from the full content
     important_lines = []
     seen_normalized = set()
-    
+
     def _normalize_for_dedup(text: str) -> str:
-        # Lowercase, truncate, and strip out numbers/IPs to collapse highly similar lines 
+        # Lowercase, truncate, and strip out numbers/IPs to collapse highly similar lines
         # (e.g. "PORT 80 open" vs "PORT 81 open")
         text = text.lower()[:80]
         text = _re.sub(r'\d+', 'N', text)
@@ -329,7 +328,6 @@ async def _call_with_persistent_retries(
 
     loop = asyncio.get_running_loop()
     retry_attempts = 0
-    last_error: Exception | None = None
 
     while True:
         try:
@@ -355,7 +353,6 @@ async def _call_with_persistent_retries(
                 raise
 
             retry_attempts += 1
-            last_error = exc
             print(
                 f"[!] {stage_label} LLM connection error, retry #{retry_attempts}... ({exc})",
                 file=sys.stdout,
@@ -465,7 +462,7 @@ async def _call_with_persistent_retries(
 
             # All pool models and fallbacks exhausted, continue retrying primary
             print(
-                f"[!] All pool models and fallback providers exhausted, resuming primary retries...",
+                "[!] All pool models and fallback providers exhausted, resuming primary retries...",
                 file=sys.stdout,
                 flush=True,
             )

@@ -11,7 +11,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from bughunter.agent.builtin_tools import infer_port_from_url
-from bughunter.config.schema import MCPServerConfig, BugHunterConfig
+from bughunter.config.schema import BugHunterConfig, MCPServerConfig
 from bughunter.mcp.registry import HealthStatus, MCPRegistry
 
 try:
