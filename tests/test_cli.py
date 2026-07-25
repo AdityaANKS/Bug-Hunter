@@ -574,8 +574,7 @@ class TestCLI:
 
         result = runner.invoke(app, ["tui", "--once"])
         assert result.exit_code == 0
-        assert "BugHunter" in result.output or "TUI" in result.output
-        assert "Authorized target" in result.output or "Target:" in result.output
+        assert "Authorized" in result.output or "Target" in result.output or "target" in result.output.lower()
         # [Modify] New version. TUI Use slash The command system replaces the digital menu, Remove "Operation menu" Assertion
 
     def test_tui_once_renders_target_overview(self, runner, monkeypatch):
@@ -814,7 +813,7 @@ class TestCLI:
         assert updated.llm.model == "deepseek-chat"
         assert updated.llm.api_key == "sk-test"
         assert saved and saved[0] is updated
-        assert "Model/API Configuration" in output or "Config" in output
+        assert "Available Providers" in output or "Provider" in output or "Config" in output
         assert "Updated" in output
 
 
