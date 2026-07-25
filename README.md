@@ -284,19 +284,6 @@ bughunter/
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Whether it's a new penetration skill, UI improvement, or bug fix — open a PR.
-
-```bash
-# Clone and install in dev mode
-git clone https://github.com/Unclecheng-li/VulnClaw.git
-cd VulnClaw
-pip install -e ".[dev]"
-```
-
----
-
 ## 📜 Credits & License
 
 Built on the [BugHunter](https://github.com/Unclecheng-li/BugHunter) engine by UncleC. Translated and extended for English-first use with multi-provider LLM support, Kali Linux sandbox, and Web UI.
