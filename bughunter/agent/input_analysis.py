@@ -12,55 +12,49 @@ def detect_phase(user_input: str) -> Optional[PentestPhase]:
     """Detect pentest phase from user input using keyword matching."""
     input_lower = user_input.lower()
     phase_keywords = {
+        PentestPhase.EXPLOITATION: [
+            "exploit",
+            "poc",
+            "rce",
+            "getshell",
+            "execute command",
+            "pocverification",
+            "poc verification",
+        ],
+        PentestPhase.VULN_DISCOVERY: [
+            "vulnerability discovery",
+            "vulnerabilities exist",
+            "vulnerability",
+            "cve",
+            "injection",
+            "sqlinjection",
+            "sqli",
+            "xss",
+            "lfi",
+            "ssrf",
+        ],
+        PentestPhase.POST_EXPLOITATION: [
+            "post-exploitation",
+            "post-penetration",
+            "intranet",
+            "lateral movement",
+            "elevate privileges",
+            "pivot",
+        ],
+        PentestPhase.REPORTING: ["report", "summarize", "generate report"],
         PentestPhase.RECON: [
-            "Reconnaissance",
             "reconnaissance",
-            "Port Scan",
+            "information gathering",
+            "port scan",
             "subdomain",
-            "Fingerprint",
+            "fingerprint",
             "directory scan",
             "recon",
             "scan",
-            "Port",
+            "port",
             "nmap",
             "collect",
         ],
-        PentestPhase.VULN_DISCOVERY: [
-            "Vulnerability Discovery",
-            "Vulnerabilityscanning",
-            "What's thereVulnerability",
-            "cve",
-            "Security testing",
-            "vulnerability",
-            "Vulnerability",
-            "injection",
-            "xss",
-            "sqli",
-        ],
-        PentestPhase.EXPLOITATION: [
-            "use",
-            "exploit",
-            "poc",
-            "verifyVulnerability",
-            "execute command",
-            "rce",
-            "getshell",
-            "get permission",
-            "hit",
-            "try",
-        ],
-        PentestPhase.POST_EXPLOITATION: [
-            "Post-Exploitation",
-            "Intranet",
-            "Horizontal",
-            "Elevate privileges",
-            "maintain",
-            "pivot",
-            "post-exploitation",
-            "tunnel",
-            "acting",
-        ],
-        PentestPhase.REPORTING: ["Report", "report", "Summarize", "tidy", "Generate report"],
     }
     for phase, keywords in phase_keywords.items():
         if any(keyword in input_lower for keyword in keywords):
@@ -136,7 +130,7 @@ def extract_task_constraints(user_input: str) -> TaskConstraints:
 
     if any(
         token in lowered
-        for token in ["Only test thisPath", "Just test thisPath", "Just test thisPath", "Only test thisPath"]
+        for token in ["only test this path", "test this path only", "only test path", "path only", "only test thispath", "just test thispath"]
     ):
         path_match = re.search(r"https?://[^\s]+(/[^\s?#]*)", text)
         if not path_match:

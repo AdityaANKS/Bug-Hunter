@@ -9,33 +9,33 @@ from typing import Any, Optional
 
 INTENT_TOOL_MAP: dict[str, list[dict[str, Any]]] = {
     # Browser automation
-    "Open web page|accessurl|Visit page|navigate": [
+    "Open web page|accessurl|Visit page|navigate|open webpage|open the webpage": [
         {"tool": "new_page", "server": "chrome-devtools"},
         {"tool": "navigate", "server": "chrome-devtools"},
     ],
-    "screenshot|screenshot|screenshot": [
+    "screenshot|screen shot|take a screenshot": [
         {"tool": "screenshot", "server": "chrome-devtools"},
     ],
     "implementjs|eval js|runjavascript": [
         {"tool": "evaluate_js", "server": "chrome-devtools"},
     ],
     # HTTP requests
-    "send request|httpask|fetch|Access interface|callapi": [
+    "send request|httpask|fetch|Access interface|callapi|send a request|access this interface": [
         {"tool": "fetch", "server": "fetch"},
         {"tool": "send_http1_request", "server": "burp"},
     ],
     # Burp Suite
-    "Capture packets|View request|intercept request|proxy": [
+    "Capture packets|View request|intercept request|proxy|capture packets|look at this request": [
         {"tool": "get_proxy_http_history", "server": "burp"},
     ],
-    "Modify data packet|replay|replay|tamper": [
+    "Modify data packet|replay|tamper": [
         {"tool": "send_http1_request", "server": "burp"},
     ],
     # Memory
-    "remember|Record|save memory": [
+    "remember|Record|save memory|remember this discovery": [
         {"tool": "save", "server": "memory"},
     ],
-    "remember|Query records|retrieve memory": [
+    "Query records|retrieve memory": [
         {"tool": "retrieve", "server": "memory"},
     ],
 }
@@ -80,6 +80,11 @@ class MCPRouter:
         """Suggest tools based on pentest phase."""
         phase_tools = {
             "Reconnaissance": [
+                {"tool": "fetch", "server": "fetch", "reason": "HTTP Request probeTarget"},
+                {"tool": "new_page", "server": "chrome-devtools", "reason": "Browser accessTarget"},
+                {"tool": "screenshot", "server": "chrome-devtools", "reason": "Screenshot recordTargetpage"},
+            ],
+            "Information gathering": [
                 {"tool": "fetch", "server": "fetch", "reason": "HTTP Request probeTarget"},
                 {"tool": "new_page", "server": "chrome-devtools", "reason": "Browser accessTarget"},
                 {"tool": "screenshot", "server": "chrome-devtools", "reason": "Screenshot recordTargetpage"},

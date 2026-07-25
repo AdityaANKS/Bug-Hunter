@@ -327,21 +327,17 @@ def _run_repl() -> None:
                 # to temporarily redirect it in addition to setting log levels.
                 logging.getLogger("paramiko").setLevel(logging.CRITICAL)
                 logging.getLogger("paramiko.transport").setLevel(logging.CRITICAL)
-                original_stderr = sys.stderr
                 try:
-                    # Redirect stderr to suppress paramiko's raw traceback output
-                    sys.stderr = open(os.devnull, 'w')
                     loop = asyncio.new_event_loop()
                     session = loop.run_until_complete(sandbox_mgr.start_sandbox(_SANDBOX_SESSION_ID))
                     loop.close()
-                finally:
-                    # Restore stderr immediately after sandbox init
-                    sys.stderr = original_stderr
+                except Exception:
+                    return
                 try:
                     if session.status == "running":
                         sandbox_started = True
                         console.print(
-                            f"[bold green][✓] Kali Sandbox:[/] Ready "
+                            f"[bold green][+] Kali Sandbox:[/] Ready "
                             f"(container={session.container_name}, ssh_port={session.ssh_port})"
                         )
                     else:

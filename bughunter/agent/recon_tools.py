@@ -335,7 +335,7 @@ async def execute_space_search(agent: Any, args: dict[str, Any]) -> str:
             extra = " | ".join(x for x in (rec.get("title", ""), rec.get("server", "")) if x)
             out.append(line + (f"  [{extra}]" if extra else ""))
         if not recs:
-            out.append("  (noneResultOr notConfiguration key)")
+            out.append("  (noneResultOr Not configured key)")
     return "\n".join(out)
 
 

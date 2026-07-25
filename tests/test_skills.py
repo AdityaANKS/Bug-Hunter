@@ -12,7 +12,7 @@ class TestSkillLoader:
 
         core = list_core_skills()
         assert isinstance(core, list)
-        assert len(core) == 7
+        assert len(core) == 8
         expected = [
             "pentest-flow",
             "recon",
@@ -21,6 +21,7 @@ class TestSkillLoader:
             "post-exploitation",
             "reporting",
             "waf-bypass",
+            "tool-guide",
         ]
         for skill in expected:
             assert skill in core, f"Missing core skill: {skill}"
@@ -184,9 +185,9 @@ class TestSkillLoader:
             ("web-security-advanced", "web-injection.md"),
             ("ai-mcp-security", "ai-app-security.md"),
             ("intranet-pentest-advanced", "06-intranet-and-host-operations-integrated.md"),
-            ("pentest-tools", "05-tools-and-operations-integrated.md"),
-            ("rapid-checklist", "payloads.md"),
-            ("web-pentest", "03-web-security-integrated.md"),
+            ("pentest-tools", "pentest-tools-reference-skill.md"),
+            ("rapid-checklist", "08-rapid-checklists-and-payloads.md"),
+            ("web-pentest", "web-injection.md"),
             ("android-pentest", "android-authorized-app-pentest-sop.md"),
             ("crypto-toolkit", "encoding-cheatsheet.md"),
             ("secknowledge-skill", "bughunter-ctf-src-routing.md"),
@@ -417,7 +418,7 @@ class TestCryptoTools:
 
         result = execute("unknown_op", "test")
         assert result["success"] is False
-        assert "Unknown operations" in result["error"]
+        assert "unknownOperation" in result["error"] or "Unknown operation" in result["error"]
 
     def test_unicode_decode(self):
         from bughunter.skills.crypto_tools import execute

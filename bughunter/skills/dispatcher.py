@@ -18,7 +18,7 @@ SKILL_INTENT_MAP: dict[str, list[str]] = {
     "Report|report|Generate report": ["reporting"],
     "bypasswaf|wafbypass|waf bypass": ["waf-bypass"],
     # Specialized skills — original
-    "webPentest|webtest|Website testing": ["web-pentest"],
+    "webpentest|web penetration|website testing|webtest|web penetration testing|webpenetration": ["web-pentest"],
     "Android|android|apk|apptest": ["android-pentest"],
     # Specialized skills — from Sec-Skill
     "Reverse|reverse|Signaturerecover|burpreplay|jsSignature|Client reverse engineering|request chain|replay|Signature": ["client-reverse"],
@@ -29,18 +29,18 @@ SKILL_INTENT_MAP: dict[str, list[str]] = {
     ],
     "cors|graphql|websocket|oauth|request smuggling|jwt|csrf|Prototype contamination": ["web-security-advanced"],
     "CertificationVulnerability|logicVulnerability|ultra vires|idor|payment logic|File upload|Pathtime travel": ["web-security-advanced"],
-    "aiSafety|mcpSafety|promptinjection|Toolabuse|agentSafety|model safety": ["ai-mcp-security"],
+    "aiSafety|mcpSafety|promptinjection|Toolabuse|agentSafety|model safety|aisecurity|mcpsecurity|ai security|mcp security": ["ai-mcp-security"],
     "aiPentest|Large model security|llmSafety|prompt injection|tool abuse": ["ai-mcp-security"],
     "mcppoison|skillssupply chain|character escape|data breach|promptleakage": ["ai-mcp-security"],
-    "IntranetPentest|Lateral movement|Elevate privileges|Endurance|tunnel|acting|domainPentest|adattack": ["intranet-pentest-advanced"],
+    "IntranetPentest|Lateral movement|Elevate privileges|Endurance|tunnel|acting|domainPentest|adattack|intranet|internal network": ["intranet-pentest-advanced"],
     "adcs|exchange|sharepoint|mimikatz|kerberoasting|dcsync|pth": ["intranet-pentest-advanced"],
     "Credential theft|bloodhound|frp|chisel|ligolo|amsibypass": ["intranet-pentest-advanced"],
     "Tool|Order|Encoding|Decoding|reverse shell|Password attack|hashcat": ["pentest-tools"],
     "sqlmap|nmap|nuclei|ffuf|burp|impacket|crackmapexec": ["pentest-tools"],
-    "quick check|payload|Bypass reminder|Quick verification|checklist|Checklist": ["rapid-checklist"],
-    "payloadEncyclopedia|bypass|bypass|quick check|quick check card|Quick recall": ["rapid-checklist"],
+    "quick check|Bypass reminder|Quick verification|checklist|Checklist|fast xss|payload": ["rapid-checklist"],
+    "payloadEncyclopedia|quick check|quick check card|Quick recall": ["rapid-checklist"],
     # SecKnowledge: practical CTF/SRC/Web+AI security testing knowledge base
-    "src|Vulnerabilitydig|Public testing|mending the sky|edusrc|cnvd": ["secknowledge-skill"],
+    "src vulnerability|src mining|public testing|mending the sky|edusrc|cnvd|src": ["secknowledge-skill"],
     "wooyun|dark clouds|prophet|l1-l4|gaarm|owasp wstg|owasp llm|owasp asi": ["secknowledge-skill"],
     "Practical security testing|Security testingKnowledge base|web+ai|web aiSafety|aiApplication security testing": [
         "secknowledge-skill"

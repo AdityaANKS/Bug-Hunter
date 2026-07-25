@@ -11,9 +11,9 @@ class TestLLMConfig:
         from bughunter.config.schema import LLMConfig
 
         config = LLMConfig()
-        assert config.model == "gpt-4o"
+        assert config.model == "z-ai/glm-5.2"
         assert config.api_key == ""
-        assert config.base_url == "https://api.openai.com/v1"
+        assert config.base_url == "https://integrate.api.nvidia.com/v1"
         assert config.temperature == 0.1  # Updated default for pentest use
         assert config.max_tokens == 4096
 
@@ -99,7 +99,7 @@ class TestBugHunterConfig:
         from bughunter.config.schema import BugHunterConfig
 
         config = BugHunterConfig()
-        assert config.llm.model == "gpt-4o"
+        assert config.llm.model == "z-ai/glm-5.2"
         assert isinstance(config.mcp.servers, dict)
         assert config.session.reasoning_state_enabled is True
         assert config.session.reflexion_enabled is True

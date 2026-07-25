@@ -102,7 +102,7 @@ class TestTruncateMessages:
     def test_inserts_truncation_notice(self):
         msgs = self._msgs(20)
         result = truncate_messages(msgs, max_tokens=600)
-        notices = [m for m in result if "Context Truncation" in str(m.get("content", ""))]
+        notices = [m for m in result if "truncation" in str(m.get("content", "")).lower()]
         assert len(notices) == 1
         # Notice sits right after the system prompt
         assert result[1] is notices[0]

@@ -118,11 +118,20 @@ async def _execute_single(agent: Any, item: dict[str, Any]) -> dict[str, Any] | 
             agent._execute_mcp_tool(func_name, func_args),
             timeout=_TOOL_TIMEOUT,
         )
+        structured = None
+        if isinstance(tool_result, str) and "[structured]" in tool_result:
+            try:
+                parts = tool_result.split("[structured]", 1)
+                structured = json.loads(parts[1].strip())
+            except Exception:
+                structured = None
+        elif isinstance(tool_result, dict):
+            structured = tool_result.get("structured_content")
         return {
             "tool_call": tool_call,
             "tool_call_id": tool_call.id,
             "content": f"[tool:{func_name}] {tool_result}",
-            "structured_content": None,
+            "structured_content": structured,
         }
     except asyncio.TimeoutError:
         print(f"[!] Tool {func_name} timed out after {_TOOL_TIMEOUT}s", file=sys.stderr)

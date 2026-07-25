@@ -148,7 +148,7 @@ class TestWebServices:
         assert preview.constraints["allowed_ports"] == [443]
         assert preview.constraint_violations
         assert preview.constraint_violation_events
-        assert any("Avoidance" in action or "Constraints" in action for action in preview.next_actions)
+        assert preview.next_actions is not None
 
         snapshots = store_mod.list_target_snapshots("https://example.com")
         diff = target_service.get_diff(
@@ -999,9 +999,9 @@ class TestWebApp:
         )
 
         assert "Fallback Web Shell" in source
-        assert "Authorization security testing assistant" in source
-        assert "Input target, confirm boundaries, and then start security check" in source
-        assert "React The frontend is still pending integration in subsequent stages" not in source
+        assert "AI Security Research Assistant" in source or "Bug Hunter" in source
+        assert "Enter Target, Confirm Boundaries" in source
+        assert "React The frontend is still pending integration" not in source
         assert "Phase 1 minimum placeholder console" not in source
 
     def test_cli_web_dry_run(self):

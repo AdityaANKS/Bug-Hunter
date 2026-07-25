@@ -33,19 +33,19 @@ def detect_phase_from_output(output: str) -> Optional[PentestPhase]:
     transitions = [
         (
             PentestPhase.VULN_DISCOVERY,
-            ["EnterVulnerability Discovery", "StartVulnerabilityscanning", "VulnerabilityDetection", "Switch toVulnerability Discovery", "phase: vuln_discovery"],
+            ["entervulnerability discovery", "vulnerability discovery phase", "startvulnerabilityscanning", "vulnerabilitydetection", "switch tovulnerability discovery", "phase: vuln_discovery"],
         ),
         (
             PentestPhase.EXPLOITATION,
-            ["EnterExploitation", "Startuse", "try to exploit", "Switch toExploitation", "phase: exploitation"],
+            ["enterexploitation", "start exploiting vulnerabilities", "startuse", "try to exploit", "switch toexploitation", "phase: exploitation"],
         ),
         (
             PentestPhase.POST_EXPLOITATION,
-            ["EnterPost-Exploitation", "IntranetPentest", "Lateral movement", "Switch toPost-Exploitation", "phase: post_exploitation"],
+            ["enterpost-exploitation", "intranetpentest", "lateral movement", "switch topost-exploitation", "phase: post_exploitation"],
         ),
         (
             PentestPhase.REPORTING,
-            ["Generate report", "tidyResult", "Penetration TestingComplete", "Switch toReport", "phase: reporting"],
+            ["generate report", "tidyresult", "penetration testingcomplete", "switch toreport", "phase: reporting"],
         ),
     ]
 
@@ -61,8 +61,11 @@ def is_completion_signal(output: str) -> bool:
         "[DONE]",
         "[COMPLETE]",
         "Penetration TestingCompleted",
+        "Penetration testing has been completed",
+        "penetration testing completed",
         "testEnd",
         "TaskComplete",
+        "task complete",
     ]
     return any(signal in output for signal in completion_signals)
 
