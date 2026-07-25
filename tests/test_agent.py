@@ -954,11 +954,6 @@ class TestAgentCore:
 
         agent = self._make_agent()
         agent.context.state.advance_phase(PentestPhase.VULN_DISCOVERY)
-    def test_build_round_context_consumes_user_vuln_hint_rounds(self):
-        from bughunter.agent.context import PentestPhase
-
-        agent = self._make_agent()
-        agent.context.state.advance_phase(PentestPhase.VULN_DISCOVERY)
         agent._reset_runtime_state(
             user_input="Testing https://example.com/login 's SQLInjection",
             detected_phase=PentestPhase.VULN_DISCOVERY,
