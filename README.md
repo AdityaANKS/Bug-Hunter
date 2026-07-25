@@ -284,8 +284,4 @@ bughunter/
 
 ---
 
-## 📜 Credits & License
-
-Built on the [BugHunter](https://github.com/Unclecheng-li/BugHunter) engine by UncleC. Translated and extended for English-first use with multi-provider LLM support, Kali Linux sandbox, and Web UI.
-
 **License:** MIT — use it, modify it, hack with it.
