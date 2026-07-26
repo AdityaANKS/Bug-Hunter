@@ -265,6 +265,7 @@ class AgentCore:
                 self._client = make_openai_client(
                     api_key=self.config.llm.api_key,
                     base_url=self.config.llm.base_url,
+                    llm_config=self.config.llm,
                 )
             except ImportError:
                 raise RuntimeError("Please install the openai package: pip install openai")

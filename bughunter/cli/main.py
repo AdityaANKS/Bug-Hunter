@@ -307,6 +307,11 @@ def _run_repl() -> None:
                 f"[bold blue][+] Fallback LLM:[/] {fb.name} "
                 f"({key_count} key{'s' if key_count > 1 else ''}, model: {model_label})"
             )
+    from bughunter.agent.tee_privacy import get_effective_tee_status
+    tee_st = get_effective_tee_status(config.llm)
+    if tee_st["enabled"] or tee_st["zero_data_retention"]:
+        tee_label = f"Enclave Active ({tee_st['mode']})" if tee_st["enabled"] else "Zero Data Retention (ZDR Anti-Training Headers Active)"
+        console.print(f"[bold green][+] TEE Privacy Guard:[/] {tee_label}")
     # Auto-start Kali sandbox if configured
     sandbox_started = False
     if getattr(config.safety, 'sandbox_auto_start', True):
@@ -436,6 +441,32 @@ def _run_repl() -> None:
 
             elif cmd_lower == "status":
                 _print_status(agent, mcp_manager, current_target, current_phase, config)
+                continue
+
+            elif cmd_lower in ("tee", "/tee") or cmd_lower.startswith("tee ") or cmd_lower.startswith("/tee "):
+                from bughunter.agent.tee_privacy import get_effective_tee_status
+                parts = user_input.split(maxsplit=1)
+                sub = parts[1].lower() if len(parts) > 1 else ""
+                if sub in ("on", "enable", "true", "1"):
+                    config.llm.tee.enabled = True
+                    config.llm.tee.zero_data_retention = True
+                    console.print("[bold green][+] TEE Privacy Guard Enabled[/] (Zero Data Retention & Hardware Attestation active)")
+                elif sub in ("off", "disable", "false", "0"):
+                    config.llm.tee.enabled = False
+                    console.print("[bold yellow][!] TEE Privacy Guard Disabled[/]")
+                elif sub in ("anonymize", "anon"):
+                    config.llm.tee.anonymize_sensitive_data = not config.llm.tee.anonymize_sensitive_data
+                    state_lbl = "Enabled" if config.llm.tee.anonymize_sensitive_data else "Disabled"
+                    console.print(f"[bold cyan][+] TEE Client-side Data Anonymization: {state_lbl}[/]")
+                else:
+                    st = get_effective_tee_status(config.llm)
+                    console.print("[bold cyan]🛡️ TEE (Trusted Execution Environment) & Privacy Guard Status[/bold cyan]")
+                    console.print(f"  • Enabled: [bold {'green' if st['enabled'] else 'yellow'}]{st['enabled']}[/]")
+                    console.print(f"  • Zero Data Retention (ZDR): [bold {'green' if st['zero_data_retention'] else 'yellow'}]{st['zero_data_retention']}[/]")
+                    console.print(f"  • Privacy Mode: [bold green]{st['mode']}[/]")
+                    console.print(f"  • Enclave Proxy URL: {st['proxy_url'] or '(Direct Provider)'}")
+                    console.print(f"  • Client Data Anonymization: {'Enabled' if st['anonymize_sensitive_data'] else 'Disabled'}")
+                    console.print("[dim]Usage: /tee [on|off|anonymize][/dim]")
                 continue
 
             elif cmd_lower.startswith("target "):

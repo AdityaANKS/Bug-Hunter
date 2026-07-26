@@ -510,6 +510,7 @@ def _generate_attack_summary_from_session(session: SessionState) -> str:
         client = make_openai_client(
             api_key=config.llm.api_key,
             base_url=config.llm.base_url,
+            llm_config=config.llm,
         )
 
         steps = session.executed_steps[-40:] if session.executed_steps else []

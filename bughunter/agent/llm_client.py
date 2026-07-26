@@ -292,6 +292,19 @@ def build_chat_completion_kwargs(
     temp = temperature if temperature is not None else getattr(llm, "temperature", None)
     uses_reasoning_params = _is_openai_reasoning_model(provider, model)
 
+    tee = getattr(llm, "tee", None)
+    if tee and getattr(tee, "anonymize_sensitive_data", False):
+        from bughunter.agent.tee_privacy import sanitize_prompt
+
+        sanitized_messages = []
+        for msg in messages:
+            msg_copy = dict(msg)
+            content = msg_copy.get("content")
+            if isinstance(content, str):
+                msg_copy["content"] = sanitize_prompt(content)
+            sanitized_messages.append(msg_copy)
+        messages = sanitized_messages
+
     kwargs: dict[str, Any] = {
         "model": model,
         "messages": messages,
@@ -389,6 +402,7 @@ async def _call_with_persistent_retries(
                     pool_client = make_openai_client(
                         api_key=api_key,
                         base_url=pool_entry.base_url,
+                        llm_config=getattr(agent.config, "llm", None),
                     )
                     pool_kwargs = _build_fallback_kwargs(agent, pool_entry.model)
                     pool_response = await loop.run_in_executor(
@@ -435,6 +449,7 @@ async def _call_with_persistent_retries(
                             fb_client = make_openai_client(
                                 api_key=api_key,
                                 base_url=fb.base_url,
+                                llm_config=getattr(agent.config, "llm", None),
                             )
                             fb_kwargs = _build_fallback_kwargs(agent, fb_model)
                             fb_response = await loop.run_in_executor(

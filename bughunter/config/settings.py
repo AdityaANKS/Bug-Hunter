@@ -52,17 +52,28 @@ def ensure_dirs() -> None:
         d.mkdir(parents=True, exist_ok=True)
 
 
-def openai_default_headers() -> dict[str, str]:
-    return {"User-Agent": os.environ.get("BUGHUNTER_LLM_USER_AGENT", DEFAULT_OPENAI_USER_AGENT)}
+def openai_default_headers(llm_config: Any = None) -> dict[str, str]:
+    from bughunter.agent.tee_privacy import build_tee_headers
+
+    headers = {"User-Agent": os.environ.get("BUGHUNTER_LLM_USER_AGENT", DEFAULT_OPENAI_USER_AGENT)}
+    headers.update(build_tee_headers(llm_config))
+    return headers
 
 
-def make_openai_client(api_key: str, base_url: str, timeout: float | None = None):
+def make_openai_client(api_key: str, base_url: str, timeout: float | None = None, llm_config: Any = None):
     from openai import OpenAI
+
+    effective_url = base_url
+    tee_cfg = getattr(llm_config, "tee", None) if llm_config is not None else None
+    if tee_cfg and tee_cfg.enabled and tee_cfg.proxy_url:
+        effective_url = tee_cfg.proxy_url
+    elif os.environ.get("BUGHUNTER_TEE_PROXY_URL"):
+        effective_url = os.environ["BUGHUNTER_TEE_PROXY_URL"]
 
     kwargs: dict[str, Any] = {
         "api_key": api_key,
-        "base_url": base_url,
-        "default_headers": openai_default_headers(),
+        "base_url": effective_url,
+        "default_headers": openai_default_headers(llm_config),
     }
     if timeout is not None:
         kwargs["timeout"] = timeout
@@ -222,6 +233,21 @@ def _overlay_env(config: BugHunterConfig) -> BugHunterConfig:
     if v := _env("LLM_TEMPERATURE"):
         with suppress(ValueError):
             config.llm.temperature = float(v)
+
+    # ── TEE & Privacy ────────────────────────────────────────────────
+    _truthy = ("1", "true", "yes", "on")
+    if v := _env("TEE_ENABLED"):
+        config.llm.tee.enabled = v.lower() in _truthy
+    if v := _env("ZERO_DATA_RETENTION"):
+        config.llm.tee.zero_data_retention = v.lower() in _truthy
+    if v := _env("TEE_MODE"):
+        config.llm.tee.mode = v
+    if v := _env("TEE_PROXY_URL"):
+        config.llm.tee.proxy_url = v
+    if v := _env("TEE_ATTESTATION_TOKEN"):
+        config.llm.tee.attestation_token = v
+    if v := _env("TEE_ANONYMIZE"):
+        config.llm.tee.anonymize_sensitive_data = v.lower() in _truthy
 
     # ── Session ──────────────────────────────────────────────────────
     if v := _env("SESSION_OUTPUT_DIR"):

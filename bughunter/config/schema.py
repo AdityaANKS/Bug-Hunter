@@ -143,6 +143,35 @@ class ModelPoolEntry(BaseModel):
     base_url: str = Field(default="", description="API base URL for this model")
 
 
+class TEEConfig(BaseModel):
+    """Trusted Execution Environment (TEE) & Privacy Protection configuration."""
+
+    enabled: bool = Field(
+        default=False,
+        description="Whether TEE & Privacy protection is active for API calls",
+    )
+    mode: str = Field(
+        default="zero_training",
+        description="TEE privacy mode: zero_training, confidential_proxy, or attestation_enclave",
+    )
+    proxy_url: str = Field(
+        default="",
+        description="API base URL of confidential TEE enclave proxy / relay",
+    )
+    attestation_token: str = Field(
+        default="",
+        description="Hardware attestation token/header for TEE enclave verification",
+    )
+    zero_data_retention: bool = Field(
+        default=True,
+        description="Enforce zero-data-retention (ZDR) anti-training headers on all LLM requests",
+    )
+    anonymize_sensitive_data: bool = Field(
+        default=False,
+        description="Sanitize credentials, tokens, and private infrastructure IPs before sending to API",
+    )
+
+
 class LLMConfig(BaseModel):
     """LLM provider configuration."""
 
@@ -171,6 +200,10 @@ class LLMConfig(BaseModel):
     model_pool: list[ModelPoolEntry] = Field(
         default_factory=list,
         description="Cooperative model pool — multiple models with roles and tiers",
+    )
+    tee: TEEConfig = Field(
+        default_factory=TEEConfig,
+        description="Trusted Execution Environment & Privacy configuration",
     )
 
 
