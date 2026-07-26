@@ -142,7 +142,12 @@ class TestCLI:
         new_state = SessionState(target="https://new.example")
         new_state.advance_phase(PentestPhase.EXPLOITATION)
 
-        observed: dict[str, str] = {}
+        # Initialize with default values to prevent KeyError
+        observed: dict[str, str] = {
+            "target_arg": "",
+            "state_target": "",
+            "phase": ""
+        }
 
         monkeypatch.setattr(cli_main, "load_config", lambda: config)
         monkeypatch.setattr(
@@ -482,7 +487,7 @@ class TestCLI:
 
         result_list = runner.invoke(app, ["target-state", "list", "https://example.com"])
         assert result_list.exit_code == 0
-        assert "snapshot" in result_list.output.lower() or "JianIncome" in result_list.output
+        assert "snapshot" in result_list.output.lower() or "JianIncome" in result_list.output
 
         result_clear = runner.invoke(app, ["target-state", "clear", "https://example.com"])
         assert result_clear.exit_code == 0
@@ -864,3 +869,4 @@ class TestCLISubCommands:
         # Should not be a usage error (exit code 2)
         assert result.exit_code != 2
         # The command will fail for other reasons (no config, etc.), but that's okay
+
