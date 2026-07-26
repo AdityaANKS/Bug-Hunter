@@ -11,7 +11,6 @@ import os
 import re
 from typing import Any
 
-
 # Standard anti-training and zero-data-retention headers across LLM providers
 _ZDR_HEADERS = {
     "X-Option-No-Train": "true",
@@ -45,12 +44,12 @@ def build_tee_headers(llm_config: Any = None) -> dict[str, str]:
     headers: dict[str, str] = {}
 
     tee_cfg = getattr(llm_config, "tee", None) if llm_config is not None else None
-    
+
     tee_enabled = bool(
         getattr(tee_cfg, "enabled", False)
         or os.environ.get("BUGHUNTER_TEE_ENABLED", "").lower() in ("1", "true", "yes")
     )
-    
+
     zdr_enabled = bool(
         getattr(tee_cfg, "zero_data_retention", True)
         or os.environ.get("BUGHUNTER_ZERO_DATA_RETENTION", "1").lower() in ("1", "true", "yes")

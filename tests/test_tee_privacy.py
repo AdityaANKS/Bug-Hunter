@@ -1,17 +1,14 @@
 """Tests for Trusted Execution Environment (TEE), Zero Data Retention (ZDR), and Privacy Guard."""
 
-import os
-from unittest.mock import MagicMock
 
-import pytest
 
 from bughunter.agent.tee_privacy import (
     build_tee_headers,
     get_effective_tee_status,
     sanitize_prompt,
 )
-from bughunter.config.schema import BugHunterConfig, LLMConfig, TEEConfig
-from bughunter.config.settings import make_openai_client, openai_default_headers
+from bughunter.config.schema import LLMConfig, TEEConfig
+from bughunter.config.settings import make_openai_client
 
 
 def test_tee_config_defaults():

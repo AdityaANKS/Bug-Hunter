@@ -430,9 +430,18 @@ class AgentCore:
         on_step: Optional[Callable[[int, AgentResult], None]] = None,
         *,
         stream_sink: Optional["StreamSink"] = None,
+        time_budget_minutes: int = 0,
     ) -> list[AgentResult]:
         """Autonomous penetration test loop."""
-        return await run_auto_pentest(self, user_input, target, max_rounds, on_step, stream_sink=stream_sink)
+        return await run_auto_pentest(
+            self,
+            user_input,
+            target,
+            max_rounds,
+            on_step,
+            stream_sink=stream_sink,
+            time_budget_minutes=time_budget_minutes,
+        )
 
     def _build_round_context(self, round_num: int, max_rounds: int) -> str:
         """Build context string for the current round in auto loop."""

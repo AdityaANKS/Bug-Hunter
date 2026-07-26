@@ -963,7 +963,7 @@ class TestAgentCore:
         assert "User" in round1 or "Hint" in round1 or "Explicit" in round1 or "Round 1" in round1
         assert agent.runtime.user_vuln_hint_rounds == 2
 
-        round2 = agent._build_round_context(2, 5)
+        agent._build_round_context(2, 5)
         assert agent.runtime.user_vuln_hint_rounds == 1
 
     def test_extract_task_constraints_parses_allowed_ports(self):
