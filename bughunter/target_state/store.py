@@ -116,13 +116,22 @@ def save_target_state(
         "low_value_rounds": plan.get("low_value_rounds", 0),
     }
 
-    path.write_text(json.dumps(raw, ensure_ascii=False, indent=2), encoding="utf-8")
-
-    snapshot_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f") + f"_{command}"
-    raw["resume_meta"]["snapshot_id"] = snapshot_id
+    base_snapshot_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f") + f"_{command}"
     snapshots = _snapshot_dir(target)
     snapshots.mkdir(parents=True, exist_ok=True)
-    (snapshots / f"{snapshot_id}.json").write_text(
+
+    snapshot_id = base_snapshot_id
+    counter = 1
+    target_file = snapshots / f"{snapshot_id}.json"
+    while target_file.exists():
+        snapshot_id = f"{base_snapshot_id}_{counter}"
+        target_file = snapshots / f"{snapshot_id}.json"
+        counter += 1
+
+    raw["resume_meta"]["snapshot_id"] = snapshot_id
+
+    path.write_text(json.dumps(raw, ensure_ascii=False, indent=2), encoding="utf-8")
+    target_file.write_text(
         json.dumps(raw, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
